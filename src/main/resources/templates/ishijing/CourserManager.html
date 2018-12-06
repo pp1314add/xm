@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>后台</title>
+	<script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<style>
+	.title_nav{
+		width: 370px;
+		height: 50px;
+	}
+	.title_nav p{
+		display: inline-block;
+		font-size: 20px;
+		color: #000;
+		margin-left:20px; 
+	}
+	.title_nav p:nth-of-type(1){
+		border-bottom: 2px solid #999;
+	}
+	.section_ul{
+		font-size: 18px;
+		color: #000000;
+		list-style-type: none;
+	}
+	.section_ul .clear{
+		color: red;
+		cursor: pointer;
+	}
+	.btn{
+		width: 100px;
+		height: 40px;
+		background: blue;
+		color: #fff;
+		border: none;
+		border-radius: 10px;
+	}
+	.pushacil_tow_title{
+		width: 250px;
+		height: 40px;
+	}
+</style>
+<body>
+	<div class="title_nav">
+		<p>发布课程</p>
+		<p>添加大章节</p>
+		<p>添加小章节</p>
+	</div>
+	<div class="section_one">
+		<form action="" id="pushacil">
+			课程标题：<input type="text" class="title" style="margin-top:10px" name="title"><br>
+			所属老师：<input type="text" class="teach" style="margin-top:10px" name="teach"><br>
+			课程定价：<input type="text" class="meny" style="margin-top:10px" name="meny"><br>
+			课程介绍：<br>
+			<textarea name="text" class="text" style="width:500px;height:300px;margin-top:10px"></textarea><br>
+			<button type="submit" style="margin-top:10px">下一步</button>
+		</form>
+	</div>
+	<div class="section_two">
+		<ul class="section_ul">
+			<li><span>1</span>试镜时什么 <span class="clear">删除</span></li>
+			<li><span>2</span>试镜时什么 <span class="clear">删除</span></li>
+			<li><span>3</span>试镜时什么 <span class="clear">删除</span></li>
+		</ul>
+		<form action="" id="pushacil_tow">
+			<input type="text" class="pushacil_tow_title" style="margin-top:10px" name="pushacil_tow_title"><br>
+			<button type="button" class="up_button btn" style="margin-top:10px">上一步</button>
+			<button type="submit" class="btn" style="margin-top:10px">下一步</button>
+		</form>
+	</div>
+	<div class="section_three">
+		<ul class="section_ul">
+			<li><span>1</span>试镜时什么 <span class="clear">删除</span></li>
+			<li><span>2</span>试镜时什么 <span class="clear">删除</span></li>
+			<li><span>3</span>试镜时什么 <span class="clear">删除</span></li>
+		</ul>
+		<form action="" id="pushacil_three">
+			<input type="text" class="pushacil_three_title" style="margin-top:10px" name="pushacil_tow_title"><br>
+			<p>所属大章节</p>
+			<input type="file" id="file" name="pushacil_three_test"><br>
+			<button type="submit" class="btn" style="margin-top:10px">确定</button>
+		</form>
+	</div>
+	<script type="text/javascript">
+		$("#pushacil").submit(function () {
+			var title = $(".title").val();
+			var teach = $(".teach").val();
+			var meny = $(".meny").val();
+			var text = $(".text").val();
+			if(title !== "" && teach !== "" && meny !== "" && text !== ""){
+ 			 	$.ajax({ 
+				     type : "get",
+				     url : "localhost:8888/course/addClasses",
+				     data : $("#pushacil").serialize(),
+				     success : function(rep) {
+				       console.log(rep);
+				       if(rep.stutas == "success"){
+				           $(".section_one").hide();
+				           $(".section_two").show();
+					   }
+				     } 
+		    	});
+			}else{
+				alert("不能为空")
+			}
+			console.log($("#pushacil").serialize());
+			return false
+		});
+		$(".up_button").on("click",function () {
+            $(".section_one").show();
+            $(".section_two").hide();
+        });
+		$(".clear").on("click",function () {
+            $(this).parent("li").hide();
+			console.log($(this))
+        });
+		$("#pushacil_tow").submit(function () {
+            var title = $(".pushacil_tow_title").val();
+            if(title !== ""){
+                $.ajax({
+                    type : "get",
+                    url : "localhost:8888/course/addClasses",
+                    data : $("#pushacil_tow").serialize(),
+                    success : function(rep) {
+                        console.log(rep);
+                        if(rep.stutas == "success"){
+                            $(".section_two").hide();
+                            $(".section_three").show();
+                        }
+                    }
+                });
+            }else{
+                alert("不能为空")
+            }
+            console.log($("#pushacil_tow").serialize());
+            return false
+        });
+        $("#pushacil_three").submit(function () {
+            var title = $(".pushacil_three_title").val();
+            if(title !== ""){
+                $.ajax({
+                    type : "get",
+                    url : "localhost:8888/course/addClasses",
+                    data : $("#pushacil_three").serialize(),
+                    success : function(rep) {
+                        console.log(rep);
+                    }
+                });
+            }else{
+                alert("不能为空")
+            }
+            console.log($("#pushacil_three").serialize());
+            return false
+        })
+	</script>
+</body>
+</html>

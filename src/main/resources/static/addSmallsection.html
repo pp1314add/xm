@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>添加小章节</title>
+	<script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<style>
+	.title_nav{
+		width: 370px;
+		height: 50px;
+	}
+	.title_nav p{
+		display: inline-block;
+		font-size: 20px;
+		color: #000;
+		margin-left:20px; 
+	}
+	.title_nav p:nth-of-type(1){
+		border-bottom: 2px solid #999;
+	}
+	.section_ul{
+		font-size: 18px;
+		color: #000000;
+		list-style-type: none;
+	}
+	.section_ul .clear{
+		color: red;
+		cursor: pointer;
+	}
+	.btn{
+		width: 100px;
+		height: 40px;
+		background: blue;
+		color: #fff;
+		border: none;
+		border-radius: 10px;
+	}
+	.pushacil_tow_title{
+		width: 250px;
+		height: 40px;
+	}
+</style>
+<body>
+	<div class="title_nav">
+		<p>添加小章节</p>
+		<p>发布课程</p>
+		<p>添加大章节</p>
+	</div>
+	<div class="section_one">
+		<ul class="section_ul">
+			<li><span>1</span>试镜时什么 <span class="clear">删除</span></li>
+			<li><span>2</span>试镜时什么 <span class="clear">删除</span></li>
+			<li><span>3</span>试镜时什么 <span class="clear">删除</span></li>
+		</ul>
+		<form action="" id="pushacil_three">
+			<input type="text" class="pushacil_three_title" style="margin-top:10px" name="pushacil_tow_title">
+			<p>所属大章节</p>
+			<p>上传视频</p>
+			<input type="file" id="file" name="pushacil_three_test"><br>
+			<button type="submit" class="btn" style="margin-top:10px">确定</button>
+		</form>
+		<form action="" id="pushacil_three">
+			<input type="text" class="pushacil_three_title" style="margin-top:10px" name="pushacil_tow_title"><br>
+			<p>添加课件</p>
+			<input type="file" id="file" name="pushacil_three_test"><br>
+			<button type="submit" class="btn" style="margin-top:10px">确定</button>
+		</form>
+	</div>
+
+	</script>
+</body>
+</html>

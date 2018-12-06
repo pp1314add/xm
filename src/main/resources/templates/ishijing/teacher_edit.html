@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<title>信息管理系统</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="/script/jquery/jquery-1.7.1.js"></script>
+<link href="style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+<link href="style/authority/common_style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/script/authority/commonAll.js"></script>
+<script src="/script/My97DatePicker/WdatePicker.js" type="text/javascript" defer="defer"></script>
+<script type="text/javascript" src="/script/artDialog/artDialog.js?skin=default"></script>
+<script src="/js/ajaxfileupload.js" type="text/javascript"></script>
+	<script type="text/javascript">
+	$(document).ready(function() {
+        var editId = $("#teacherid").text();
+            $.ajax({
+            url:'/findteacherById',
+            type:'POST',
+            dataType: 'JSON',
+            data:{"id":editId},
+            success:function(data){
+                $("#teacherPicture").val(data.teacherPicture);
+                $("#teacherName").val(data.teacherName);
+                $("#teacherNameReal").val(data.teacherNameReal);
+                $("#idCard").val(data.idCard);
+                $("#teacherTel").val(data.teacherTel);
+
+                $("#teacherEmail").val(data.teacherEmail);
+                $("#teacherProfile").val(data.teacherProfile);
+                $("#openingBank").val(data.openingBank);
+                $("#branckBank").val(data.branckBank);
+                $("#bankCard").val(data.bankCard);
+				var radioflag = data.teacherProfit;
+				if(radioflag==1){
+                    $("input[name='radio'][value='1']").attr("checked",true);
+				}else{
+                    $("input[name='radio'][value='2']").attr("checked",true);
+				}
+            },
+            error:function(){
+                alert(2);
+			}
+        })
+
+	});
+	function submitteacher(){
+		   var id = $("#teacherid").text();
+           var teacherPicture =  $("#teacherPicture").val();
+           var teacherName = $("#teacherName").val();
+           var teacherNameReal = $("#teacherNameReal").val();
+           var idCard = $("#idCard").val();
+           var teacherTel = $("#teacherTel").val();
+           var teacherEmail = $("#teacherEmail").val()
+           var teacherProfile = $("#teacherProfile").val();
+           var openingBank = $("#openingBank").val();
+           var branckBank = $("#branckBank").val();
+           var bankCard = $("#bankCard").val();
+           var teacherProfit = $("input:radio[name='radio']:checked").val();
+
+           var result={"id":id,"teacherPicture":teacherPicture,"teacherName":teacherName,"teacherNameReal":teacherNameReal,"idCard":idCard,"teacherTel":teacherTel,"teacherEmail":teacherEmail,"teacherProfile":teacherProfile,"branckBank":branckBank,"bankCard":bankCard,"teacherProfit":teacherProfit};
+            $.ajax({
+				url:'/insertorupdateteacher',
+				type:'POST',
+                dataType: 'text',
+                contentType:"application/json",
+				data:JSON.stringify(result),
+				success:function(data){
+					alert("保存成功");
+					window.location.href="/teachermanager";
+				}
+			})
+	}
+
+    $("#changeImg").click(function(){
+        alert("aa");
+        $('#logo').click();
+    });
+
+    function sendChange(){
+        fileUpload();
+    }
+    function fileUpload() {
+		var fileobl = document.getElementById("img").files[0];
+		alert(fileobl);
+        var formData = new FormData();
+        formData.append('img',fileobl);
+
+        if(!validate_img($('#img'))){
+            return;
+        }
+
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            cache: false,
+            enctype: 'multipart/form-data',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend:function(){
+
+            },
+
+            success:function(data){
+
+                alert(data.msg);
+                if(data.code==1){
+                    window.location.reload();
+                }
+
+            },
+
+            error:function(){
+
+            }
+
+        });
+
+    }
+
+
+    //限制上传文件的类型和大小
+    function validate_img(ele){
+        // 返回 KB，保留小数点后两位
+        //alert((ele.files[0].size/(1024*1024)).toFixed(2));
+        var file = ele.val();
+        if(!/.(gif|jpg|jpeg|png|GIF|JPG|bmp)$/.test(file)){
+
+            alert("图片类型必须是.gif,jpeg,jpg,png,bmp中的一种");
+            return false;
+        }else{
+            //alert((ele.files[0].size).toFixed(2));
+            //返回Byte(B),保留小数点后两位
+            if(((ele[0].files[0].size).toFixed(2))>=(2*1024*1024)){
+
+                alert("请上传小于2M的图片");
+                return false;
+            }else  return true;
+        }
+        return false;
+
+    }
+
+
+
+	function back(){
+        window.location.href='/teachermanager';
+	}
+	
+	/** 表单验证  **/
+	function validateForm(){
+		if($("#fyXqName").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写房源小区', ok:true,});
+			return false;
+		}
+		if($("#fyDh").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写房源栋号', ok:true,});
+			return false;
+		}
+		if($("#fyCh").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写房源层号', ok:true,});
+			return false;
+		}
+		if($("#fyFh").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写房源房号', ok:true,});
+			return false;
+		}
+		if($("#fyZongMj").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写房源面积', ok:true,});
+			return false;
+		}
+		if($("#fyJizuMj").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写计租面积', ok:true,});
+			return false;
+		}
+		if($("#fyZldz").val()==""){
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'填写房源座落地址', ok:true,});
+			return false;
+		}
+		return true;
+	}
+
+
+</script>
+</head>
+<body>
+<!--/*@thymesVar id="editId" type=""*/-->
+<span id="teacherid" th:text="${editId}" style="display:none"></span>
+<form id="submitForm" name="submitForm" action="" method="post">
+	<input type="hidden" name="fyID" value="14458625716623" id="fyID"/>
+	<div id="container">
+		<div id="nav_links">
+			当前位置：新增数据&nbsp;>&nbsp;<span style="color: #1A5CC6;" name="cast">编辑教师</span>
+			<div id="page_close">
+				<a href="javascript:parent.$.fancybox.close();">
+					<img src="images/common/page_close.png" width="20" height="20" style="vertical-align: text-top;"/>
+				</a>
+			</div>
+		</div>
+		<div class="ui_content">
+			<table  cellspacing="0" cellpadding="0" width="100%" align="left" border="0">
+				<tr name="cast">
+					<td class="ui_text_rt" >教师头像</td>
+
+					<td class="ui_text_lt">
+						<div class="main-btn" ><img  width=170 height=100 id="teacherPicture"></img></div>
+						<input type="file" id="img" name="logo"  onchange="fileUpload();">
+						<!-- 在选择图片的时候添加事件，触发Ajax异步上传 -->
+					</td>
+				</tr>
+
+				<tr name="cast">
+					<td class="ui_text_rt" >教师昵称:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="teacherName" name="cast"   class="ui_input_txt02"/>
+					</td>
+				</tr>
+
+
+				<tr name="cast">
+					<td class="ui_text_rt">教师实名:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="teacherNameReal" name="cast"   class="ui_input_txt02"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >身份证号:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="idCard" name="cast"  class="ui_input_txt02"/>
+					</td>
+				</tr>
+
+				<tr name="cast">
+					<td class="ui_text_rt" >联系手机:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="teacherTel" name="cast"  class="ui_input_txt02"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >联系邮箱:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="teacherEmail" name="cast"  class="ui_input_txt02"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >教师简介:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="teacherProfile" name="cast"  class="ui_input_txt02"/>
+					</td>
+				</tr>
+
+				<tr name = "company">
+					<td class="ui_text_rt">开户行:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="openingBank" name="company"   class="ui_input_txt02"/>
+					</td>
+				</tr>
+
+
+				<tr name = "company">
+					<td class="ui_text_rt">开户行支行:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="branckBank" name="company"   class="ui_input_txt02"/>
+					</td>
+				</tr>
+
+				<tr name = "company">
+					<td class="ui_text_rt">银行卡号:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="bankCard" name="company"  class="ui_input_txt02"/>
+					</td>
+				</tr>
+				<tr name = "company">
+					<td class="ui_text_rt">教师分成:</td>
+					<td class="ui_text_lt">
+						50%  &nbsp;&nbsp;<input type="radio" id="teacherFc1" name="radio" value="1"/>
+						70%  &nbsp;&nbsp;<input type="radio" id="teacherFc2" name="radio" value="2"/>
+					</td>
+				</tr>
+				<tr name = "company">
+					<td class="ui_text_rt">教师关联账号:</td>
+					<td class="ui_text_lt">
+						<input type="text" id="comcontactemail" name="company"  class="ui_input_txt02"/>
+					</td>
+				</tr>
+
+
+				<tr name = "company">
+					<td>&nbsp;</td>
+					<td class="ui_text_lt">
+						&nbsp;<input id="last" type="button" value="上一步" class="ui_input_btn01" onclick="back()"/>
+						&nbsp;<input id="submit" type="button" value="提交" class="ui_input_btn01" onclick="submitteacher()"/>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</form>
+
+</body>
+</html>

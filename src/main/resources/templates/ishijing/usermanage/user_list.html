@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="script/jquery/jquery-1.7.1.js"></script>
+<link href="style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+<link href="style/authority/common_style.css" rel="stylesheet" type="text/css">
+<link href="css/bootstrap-table.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="script/authority/commonAll.js"></script>
+<script type="text/javascript" src="script/fancybox/jquery.fancybox-1.3.4.js"></script>
+<script type="text/javascript" src="script/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<script src="script/My97DatePicker/WdatePicker.js" type="text/javascript" defer="defer"></script>
+<link rel="stylesheet" type="text/css" href="style/authority/jquery.fancybox-1.3.4.css" media="screen"></link>
+<script type="text/javascript" src="script/artDialog/artDialog.js?skin=default"></script>
+<title>信息管理系统</title>
+<script type="text/javascript" th:inline="javascript">
+	var page=1;
+	total=1;
+	$(document).ready(function(){
+		var now = new Date(); 
+		var h = now.getFullYear(); 
+		var m = (now.getMonth() + 1>9) ? now.getMonth() + 1 : "0"+(now.getMonth() + 1); 
+		var s = (now.getDate()>9)  ? now.getDate()  : "0"+now.getDate(); 
+		/**
+		详情
+		**/
+		 $("a.edit").fancybox({
+		    	'width' : 733,
+		        'height' : 530,
+		        'type' : 'iframe',
+		        'hideOnOverlayClick' : false,
+		        'showCloseButton' : false,
+		        'onClosed' : function() { 
+		        	alert("hhh")
+		        	window.location.href = '/normalUsers';
+		        }
+		    });
+		 $.ajax({
+			type:"POST",
+			url:"/usersByCondition",
+			dataType : "json",
+			headers	:{'Content-Type': 'application/json'},
+			async:'false',
+			success:function(data){
+				if(data.msg=="success"){
+				}
+				var users=data.data.content;
+				var totalPages=data.data.totalPages;
+				var totalElements=data.data.totalElements;
+				var pageNum=data.data.pageable.pageNumber+1;
+				//var total=[[${session.totalPages}]];
+				
+				
+				
+						
+				for(var i=0;i<users.length;i++)
+				{
+					var user = users[i];
+				//alert("数据=============="+aa);
+					var tc="<tr><td><input type='checkbox' name='IDCheck' value='14458579642011' class='acb' /></td>"+
+	         					"<td>"+user.id+"</td>"+
+	          					"<td>"+user.username+"</td>"+
+	          					"<td>"+user.sex+"</td>"+
+	          					"<td>"+user.age+"</td>"+
+	          					"<td>"+user.telphone+"</td>"+
+	          					"<td>"+user.area+"</td>"+
+	          					"<td>"+user.authenticationType+"</td>"+
+	          					"<td>"+user.crew+"</td>"+
+	          					"<td>"+new Date(user.registrationTime).format("yyyy/MM/dd")+"</td>"+
+	          					"<td>"+new Date(user.lastloginTime).format("yyyy/MM/dd")+"</td>"+
+	         					"<td><a href='/user?id="+user.id+"' class='edit'>详情</a></td>"+
+	        					"</tr>"
+					$("#usertable").append(tc);
+					$('#totalPages').html(totalPages);
+					total=totalPages;
+					$("#totalElements").html(totalElements);
+					$("#curPage").html(pageNum);
+				}
+			}
+		 });
+	});
+	/**日期格式转化
+	**/
+	Date.prototype.format = function(fmt)   
+    { //author: meizz   
+      var o = {   
+        "M+" : this.getMonth()+1,                 //月份   
+        "d+" : this.getDate(),                    //日   
+        "h+" : this.getHours(),                   //小时   
+        "m+" : this.getMinutes(),                 //分   
+        "s+" : this.getSeconds(),                 //秒   
+        "q+" : Math.floor((this.getMonth()+3)/3), //季度   
+        "S"  : this.getMilliseconds()             //毫秒   
+      };   
+      if(/(y+)/.test(fmt))   
+        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));   
+      for(var k in o)   
+        if(new RegExp("("+ k +")").test(fmt))   
+      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));   
+      return fmt;   
+    }  
+	/**
+	注册日期格式校验
+	
+	function registdateValid(date,id){
+		var now=new Date();
+		var h = now.getFullYear(); 
+		var m = (now.getMonth() + 1>9) ? now.getMonth() + 1 : "0"+(now.getMonth() + 1); 
+		var s = (now.getDate()>9)  ? now.getDate()  : "0"+now.getDate(); 
+		now=h+"-"+m+"-"+s;
+		var dateto=$("#registTimeTo").val();
+		var datefrom=$("#registTimeFrom").val();
+		if(id=="registTimeFrom"){
+			if(date > now){
+				alert("选择日期不可大于当前日期");
+				document.submitForm.registTimeFrom.value=null;
+			}else if(dateto != null && dateto != '' && date > dateto){
+				alert("所选日期不可大于后者");
+				document.submitForm.registTimeFrom.value=null;
+			}
+		}
+		else if(id == "registTimeTo"){
+			if(date > now){
+				alert("选择日期不可大于当前日期");
+				document.submitForm.registTimeTo.value=null;
+			}
+			else if(date<datefrom){
+				alert("所选日期不可大于后者");
+				document.submitForm.registTimeTo.value=null;
+			}
+		}
+	}
+	**/
+	/**年龄格式校验
+	**/
+	function ageValid(age,id){
+		var agefrom = $("#agefrom").val();
+		var ageto=$("#ageto").val();
+		if(age<0){
+			alert("所输年龄违法，请重新输入");
+		}
+	}
+	/** 用户角色   **/
+	var userRole = '';
+	
+	/** 模糊查询  **/
+	function search(pages){
+		//$("#submitForm").attr("action", "/normalUsers?page=" + 1).submit();
+		var logintimefrom=$("#loginTimeFrom").val();
+		var registtimefrom=$("#registTimeFrom").val();
+		var logintimeto=$("#loginTimeTo").val();
+		var registtimeto=$("#registTimeTo").val();
+		//var sex	=$("#asj_sex_dic option:selected").val();
+		//var authen =$("#asj_authentication_dic option:selected").val();
+		var agefrom =$("#agefrom").val();
+		var ageto=$("#ageto").val();
+		//var pageNum=$("#pageNum").val();
+		if(pages==undefined){
+			pages=page;
+		}
+		alert(pages)
+		var json={
+				"logintimefrom":logintimefrom,
+				"registtimefrom":registtimefrom,
+				"logintimeto":logintimeto,
+				"registtimeto":registtimeto,
+				"agefrom":agefrom,
+				"ageto":ageto
+				
+			};
+		$.ajax({
+			type:"POST",
+			url:"/usersByCondition?pageNum="+pages,
+			dataType : "json",
+			async:'false',
+			headers	:{'Content-Type': 'application/json'},
+			data:JSON.stringify(json),
+			success:function(data){
+				page=pages;
+				var users=data.data.content;
+				var totalPages=data.data.totalPages;
+				var totalElements=data.data.totalElements;
+				var pageNum=data.data.pageable.pageNumber+1;
+				$("#usertable").empty();
+				var head="<tr>"+
+				"<th width='30'><input type='checkbox' id='all' onclick='selectOrClearAllCheckbox(this);' />"+
+				"</th>"+
+				"<th>ID</th>"+
+				"<th>会员昵称</th>"+
+				"<th>性别</th>"+
+				"<th>年龄</th>"+
+				"<th>手机号码</th>"+
+				"<th>所在地区</th>"+
+				"<th>认证类型</th>"+
+				"<th>所属剧组</th>"+
+				"<th>注册时间</th>"+
+				"<th>最后登陆时间</th>"+
+				"<th>操作</th>"+
+			"</tr>";
+				//var total=[[${session.totalPages}]];
+				for(var i=0;i<users.length;i++)
+				{
+					var user = users[i];
+				//alert("数据=============="+aa);
+					var tc=head+"<tr><td><input type='checkbox' name='IDCheck' value='14458579642011' class='acb' /></td>"+
+	         					"<td>"+user.id+"</td>"+
+	          					"<td>"+user.username+"</td>"+
+	          					"<td>"+user.sex+"</td>"+
+	          					"<td>"+user.age+"</td>"+
+	          					"<td>"+user.telphone+"</td>"+
+	          					"<td>"+user.area+"</td>"+
+	          					"<td>"+user.authenticationType+"</td>"+
+	          					"<td>"+user.crew+"</td>"+
+	          					"<td>"+new Date(user.registrationTime).format("yyyy/MM/dd")+"</td>"+
+	          					"<td>"+new Date(user.lastloginTime).format("yyyy/MM/dd")+"</td>"+
+	         					"<td><a href='/user?id="+user.id+"' class='edit'>详情</a></td>"+
+	        					"</tr>"
+					$("#usertable").append(tc);
+					$('#totalPages').html(totalPages);
+					total=totalPages;
+					$("#totalElements").html(totalElements);
+					$("#curPage").html(pageNum);
+				}
+			}
+		});
+	}
+	/**
+	 /** 性别下拉单 **/
+	 function selectList(typeCode){
+		 $.ajax({
+				type:"POST",
+				url:"/getDicList",
+				dataType : "json",
+				async:'false',
+				data:{
+					"typeCode":typeCode	
+				},
+				success:function(data){
+					$('#'+typeCode).empty();
+					$('#'+typeCode).append("<option value=''>请选择</option>");
+					if(data.data != null){
+						var result=data.data;
+						for(var i=0;i<result.length;i++){
+			                var value = result[i].value;
+			                var lable = result[i].name;
+			                $('#'+typeCode).append("<option value="+value+">"+lable+"</option>");
+			            }
+					}
+				}
+			});
+	 }
+	/**普通页面跳转**/
+	function jumpNormalPage(p){
+		if(p == 0){
+			alert("当前已经是第一页");
+			return null;
+		}else if(p == total+1){
+			alert("当前已经是最后一页");
+			return null;
+		}else{
+			search(p)
+		}
+	}
+	/** 输入页跳转 **/
+	function jumpInputPage(){
+		// 如果“跳转页数”不为空
+		if($("#jumpNumTxt").val() != ''){
+			var page = parseInt($("#jumpNumTxt").val());
+			// 如果跳转页数在不合理范围内，则置为1
+			if(page<0 | page>total){
+				art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'请输入合适的页数，\n自动为您跳到首页', ok:true,});
+				page = 1;
+			}
+			search(page)
+		}else{
+			// “跳转页数”为空
+			art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'请输入合适的页数，\n自动为您跳到首页', ok:true,});
+			search(1)
+		}
+	}
+</script>
+<style>
+	.alt td{ background:black !important;}
+</style>
+</head>
+<body>
+	<form id="submitForm" name="submitForm" action="/userList" method="post">
+		<input type="hidden" name="allIDCheck" value="" id="allIDCheck"/>
+		<input type="hidden" name="pageNum" th:value="${pageNum}" id="pageNum"/>
+		<input type="hidden" th:value="${totalPages}" id="totalPage"/>
+		<div id="container">
+			<div class="ui_content">
+				<div class="ui_text_indent">
+					<div id="box_border">
+						<div id="box_top">搜索</div>
+						<div id="box_center">
+							注册时间范围
+							<input id="registTimeFrom" class="Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true,maxDate:'#F{$dp.$D(\'registTimeTo\')}'})" />  
+					        -  
+					        <input id="registTimeTo" class="Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true,maxDate:'%y-%M-%d',minDate:'#F{$dp.$D(\'registTimeFrom\')}',startDate:'#F{$dp.$D(\'registTimeFrom\',{d:+1})}'})" /> 
+							<!-- <input type="date" id="registTimeFrom" name="registTimeFrom" value="" onchange="registdateValid(this.value,this.id)" style="width:120px;"/>
+                            —
+							<input type="date" id="registTimeTo" name="registTimeTo" value="" onchange="registdateValid(this.value,this.id)"style="width:120px;"/> -->
+							&emsp;
+							最后登陆时间范围
+							<input id="loginTimeFrom" class="Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true,maxDate:'#F{$dp.$D(\'loginTimeTo\')}'})" />  
+					        -  
+					        <input id="loginTimeTo" class="Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true,maxDate:'%y-%M-%d',minDate:'#F{$dp.$D(\'loginTimeFrom\')}',startDate:'#F{$dp.$D(\'loginTimeFrom\',{d:+1})}'})" /> 
+							<!--  <input type="date" value="" id="loginTimeFrom" onchange="logindateValid(this.value,this.id)"style="width:120px;"/>
+                            —
+							<input type="date" value="" id="loginTimeTo" onchange="logindateValid(this.value,this.id)"style="width:120px;"/>-->
+                            &emsp;
+							年龄范围
+							<input type="text" id="agefrom" name="agefrom" class="ui_input_txt04" />
+                            —
+							<input type="text" id="ageto" name="ageto" class="ui_input_txt04" />（岁）
+							<input type="button" value="搜索" class="ui_input_btn01" onclick="search();" /> 
+							&emsp;性别
+            				<select class="ui_select01" id="asj_sex_dic" name="asj_sex_dic" onclick="selectList('asj_sex_dic');">
+   								<option value=""> -- 请选择 -- </option>
+							</select>
+							&emsp;认证类型
+							<select name="asj_authentication_dic" id="asj_authentication_dic" class="ui_select01" onclick="selectList('asj_authentication_dic');">
+                                <option value="">--请选择--</option>
+                            </select>
+
+						</div>
+						 <div id="box_bottom">
+							关键词搜索&nbsp;&nbsp;<input type="text" id="fyZldz" name="fangyuanEntity.fyZldz" class="ui_input_txt02" />
+							<input type="button" value="查询" class="ui_input_btn01" onclick="search();" /> 
+						</div> 
+					</div>
+				</div>
+			</div>
+			<div class="ui_content">
+				<div class="ui_tb">
+					<table id="usertable"class="table" cellspacing="0" cellpadding="0" width="100%" align="center" border="0">
+						<tr>
+							<th width="30"><input type="checkbox" id="all" onclick="selectOrClearAllCheckbox(this);" />
+							</th>
+							<th>ID</th>
+							<th>会员昵称</th>
+							<th>性别</th>
+							<th>年龄</th>
+							<th>手机号码</th>
+							<th>所在地区</th>
+							<th>认证类型</th>
+							<th>所属剧组</th>
+							<th>注册时间</th>
+							<th>最后登陆时间</th>
+							<th>操作</th>
+						</tr>
+						
+						
+					</table>
+				</div>
+				<div class="ui_tb_h30">
+					<div class="ui_flt" style="height: 30px; line-height: 30px;">
+					共有
+					<span class="ui_txt_bold04" id="totalElements"></span>
+					条记录，当前第
+					<span class="ui_txt_bold04" id="curPage">
+					</span>/<span class="ui_txt_bold04" id="totalPages">
+					</span>
+					页
+				</div>
+				<div class="ui_frt">
+						<input type="button" value="首页" class="ui_input_btn01" onclick="jumpNormalPage(1);" />
+						<input type="button" value="上一页" class="ui_input_btn01" onclick="jumpNormalPage(page-1)"/>
+						<input type="button" value="下一页" class="ui_input_btn01"
+							onclick="jumpNormalPage(page+1);" />
+						<input type="button" value="尾页" class="ui_input_btn01"
+							onclick="jumpNormalPage(total);" />
+						转到第<input type="text" id="jumpNumTxt" class="ui_input_txt01" />页
+						 <input type="button" class="ui_input_btn01" value="跳转" onclick="jumpInputPage();" />
+				</div>
+				</div>
+			</div>
+		</div>
+	</form>
+
+</body>
+</html>

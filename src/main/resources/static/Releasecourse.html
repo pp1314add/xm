@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>后台</title>
+	<script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<style>
+	.title_nav{
+		width: 370px;
+		height: 50px;
+	}
+	.title_nav p{
+		display: inline-block;
+		font-size: 20px;
+		color: #000;
+		margin-left:20px; 
+	}
+	.title_nav p:nth-of-type(1){
+		border-bottom: 2px solid #999;
+	}
+	.section_ul{
+		font-size: 18px;
+		color: #000000;
+		list-style-type: none;
+	}
+	.section_ul .clear{
+		color: red;
+		cursor: pointer;
+	}
+	.btn{
+		width: 100px;
+		height: 40px;
+		background: blue;
+		color: #fff;
+		border: none;
+		border-radius: 10px;
+	}
+	.pushacil_tow_title{
+		width: 250px;
+		height: 40px;
+	}
+</style>
+<body>
+	<div class="title_nav">
+		<p>发布课程</p>
+		<p>添加大章节</p>
+		<p>添加小章节</p>
+	</div>
+	<div class="section_one">
+		<form action="" id="pushacil">
+			课程标题：<input type="text" class="title" style="margin-top:10px" name="classtitle"><br>
+			所属老师：<input type="text" class="teach" style="margin-top:10px" name="teacher"><br>
+			课程定价：<input type="text" class="meny" style="margin-top:10px" name="price"><br>
+			课程介绍：<br>
+			<textarea name="castIntroduce" class="text" style="width:500px;height:300px;margin-top:10px"></textarea><br>
+			<button type="submit" style="margin-top:10px">下一步</button>
+		</form>
+	</div>
+	<script>
+        $("#pushacil").submit(function () {
+            var title = $(".title").val();
+            var teach = $(".teach").val();
+            var meny = $(".meny").val();
+            var text = $(".text").val();
+            if(title !== "" && teach !== "" && meny !== "" && text !== ""){
+                $.ajax({
+                    type : "get",
+                    url : "localhost:8888/course/addClasses",
+                    data : $("#pushacil").serialize(),
+                    success : function(rep) {
+                        console.log(rep);
+                        if(rep.stutas == "success"){
+                            $(".section_one").hide();
+                            $(".section_two").show();
+                        }
+                    }
+                });
+            }else{
+                alert("不能为空")
+            }
+            console.log($("#pushacil").serialize());
+            return false
+        });
+	</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>爱试镜-后台系统</title>
+	<link href="style/authority/login_css.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+
+	<script th:src="@{/script/jquery/jquery-1.7.1.js}"></script>
+	<script th:inline="javascript">
+        $(document).ready(function(){
+            $("#regist_sub").click(function(){
+                //判断用户是否为空
+                var name=$("#name").val();
+                var pwd=$("#pwd").val();
+                var qrpwd=$("#qrpwd").val();
+                if(pwd!=qrpwd){
+                    $("#login_err").text("两次输入的密码不一致！")
+                    return false;
+                }
+                if(name == null || name==""){
+                    $("#login_err").text("用户名不可为空")
+                    //密码是否空
+                }else if(pwd == null || pwd==""){
+                    $("#login_err").text("密码不可为空")
+                }else{
+                    $.ajax({
+                        url:'/regist',
+                        type:'POST',
+                        dataType:'text',
+                        async:'false',
+                        data:{
+                            "name":name,
+                            "pwd":pwd
+                        },
+                        success:function(data){
+                            if(data == "success")
+                            //跳转index
+                                alert("注册成功")
+                            $("#submitForm").attr("action", "/login").submit();
+
+                            if(data=="failed")
+                                $("#login_err").text("用户名或密码不正确")
+                        },
+                        error:function(data){
+                            if(data=="failed")
+                                alert("用户名或密码错误")
+                        }
+                    })
+
+                }
+            });
+        });
+		/*回车事件*/
+        function EnterPress(e){ //传入 event
+            var e = e || window.event;
+            if(e.keyCode == 13){
+                //判断用户是否为空
+                //密码是否空
+                //跳转后台逻辑校验
+                $("#submitForm").attr("action", "index.html").submit();
+            }
+        }
+
+	</script>
+</head>
+<body>
+
+<div id="login_center">
+	<div id="login_area">
+		<div id="login_box">
+			<div id="login_form">
+
+				<form id="submitForm" action="" method="post">
+					<div id="login_tip">
+						<span id="login_err" class="sty_txt2"></span>
+					</div>
+
+
+					<div>
+						用户名：<input type="text" name="username" class="username" id="name">
+					</div>
+					<div>
+						密&nbsp;&nbsp;&nbsp;&nbsp;码：<input type="password" name="password" class="pwd" id="pwd" onkeypress="EnterPress(event)" onkeydown="EnterPress()">
+					</div>
+					<div>
+						确认密码：<input type="password" name="password2" class="pwd" id="qrpwd" onkeypress="EnterPress(event)" onkeydown="EnterPress()">
+					</div>
+					<div id="btn_area">
+						<input type="button" class="login_btn" id="regist_sub" value="提 交">
+						<input type="reset" class="login_btn" id="regist_ret" value="重 置">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript">
+</script>
+</body>
+</html>

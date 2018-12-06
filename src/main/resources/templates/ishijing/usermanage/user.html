@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>信息管理系统</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="script/jquery/jquery-1.7.1.js"></script>
+<link href="style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+<link href="style/authority/common_style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="script/authority/commonAll.js"></script>
+<script type="text/javascript" src="script/jquery/jquery-1.4.4.min.js"></script>
+<script src="script/My97DatePicker/WdatePicker.js" type="text/javascript" defer="defer"></script>
+<script type="text/javascript" src="script/artDialog/artDialog.js?skin=default"></script>
+<script type="text/javascript">
+	page=1;
+	$(document).ready(function() {
+		$("#cancelbutton").click(function() {
+			/**  关闭弹出iframe  **/
+			window.parent.$.fancybox.close();
+		});
+		document.getElementById("baseinfo").style.color='#1A5CC6';  
+		id=$("#ID").val();
+		/**
+			基本信息
+		**/
+		$.ajax({
+			type:"POST",
+			url:"/userinfo",
+			dataType : "json",
+			data:{
+				"id":id
+			},
+			headers	:{'Content-Type': 'application/json'},
+			success:function(data){
+				if(data.msg =="success"){
+					var user=data.data;
+					$("#id").html(user.id);
+					$("#username").html(user.username);
+					$("#authenticationType").html(user.authenticationType);
+					$("#area").html(user.area);
+					$("#telphone").html(user.telphone);
+					$("#crew").html(user.crew);
+					$("#age").html(user.age);
+					$("#economicCompany").html(user.economicCompany);
+					//document.getElementById("typediv1").style.display="";//显示
+				}
+			}
+		});
+		/**
+			封号
+		**/
+		$.ajax({
+			type:"POST",
+			url:"/seal",
+			dataType : "json",
+			data:{
+				"id":id
+			},
+			headers	:{'Content-Type': 'application/json'},
+			success:function(data){
+				if(data.msg =="success"){
+					var sealinfo=data.data;
+					if(sealinfo.userStatus == "0"){
+						$("#status").html("冻结");
+						document.getElementById("seal").style.display="none";
+						document.getElementById("unseal").style.display="";
+						document.getElementById("showfreeze").style.display="";
+						$("#freezetimes").html(sealinfo.freezingPeriod);
+						
+					}else if(sealinfo.userStatus == "1"){
+						$("#status").html("正常");
+						document.getElementById("seal").style.display="";
+						document.getElementById("unseal").style.display="none";
+						document.getElementById("showfreeze").style.display="none";
+						
+					}
+					$("#marker").val(sealinfo.remark);
+					$("#sealid").val(sealinfo.id);
+				}
+			}
+		});
+		/**
+			举报
+		**/
+		$.ajax({
+			type:"POST",
+			url:"/report",
+			dataType : "json",
+			data:{
+				"id":id,
+				"page":page
+			},
+			headers	:{'Content-Type': 'application/json'},
+			success:function(data){
+				if(data.msg =="success"){
+					var reports=data.data.content;
+					var totalPages=data.data.totalPages;
+					var totalElements=data.data.totalElements;
+					//var pageNum=data.data.pageable.pageNumber+1;
+					for(var i=0;i<reports.length;i++)
+					{
+						var report = reports[i];
+					//alert("数据=============="+aa);
+						var tc="<tr><td><input type='hidden' name='IDCheck' value='"+report.id+"' /></td>"+
+		          					"<td>"+new Date(report.reportedTime).format("yyyy/MM/dd")+"</td>"+
+		          					"<td>"+report.reportedTel+"</td>"+
+		          					"<td>"+report.reportedType+"</td>"+
+		          					"<td>"+report.reportedContent+"</td>"+
+		          					"<td>"+report.reportId+"</td>"+
+		          					"<td>"+report.reportName+"</td>"+
+		          					"<td>"+report.reportDescription+"</td>"+
+		          					"<td>"+report.processState+"</td>"+
+		          					"<td>"+report.processResult+"</td>"+
+		         					"<td><a href='/user?id=' class='edit'>恢复</a></td>"+
+		        					"</tr>";
+						$("#reports").append(tc);
+						$('#totalPage').html(totalPages);
+						$("#totalElement").html(totalElements);
+						$("#curPages").html(page);
+						$("#reportnum").html(reports.length)
+					}
+				}
+			}
+		});
+		history();
+		/**
+			详细信息
+		**/
+		$.ajax({
+			type:"POST",
+			url:"/information",
+			dataType : "json",
+			data:{
+				"id":id
+			},
+			headers	:{'Content-Type': 'application/json'},
+			success:function(data){
+				if(data.msg =="success"){
+					//教育
+					var user=data.data;
+					$("#school").html(user.graduateSchool);
+					$("#school_type").html(user.levelSchool);
+					$("#schooltimefrom").html(new Date(user.fromtoTime).format("yyyy/MM/dd"));
+					$("#subject").html(user.subject);
+					$("#schoolintro").html(user.introduceMyself);
+					$("#selfintro").html(user.introduceMyself);
+					$("#schooltimeto").html(new Date(user.graduateTime).format("yyyy/MM/dd"));
+					//影视
+					var movies=data.movies;
+					for(var i=0;i<movies.length;i++)
+					{
+						var movie=
+							  "<div style='float:left;'><span id='movie' style='align:left;'>"+movies[i].movieName+"</span></div>"+
+							  "<div style='margin-right:150px;float:right;'><span id='showtime' style='align:right;'>"+new Date(movies[i].playTime).format("yyyy/MM/dd")+"</span></div><br />"+
+							  "<div>出品方：<span id='schooltimefrom' style='align:left;'>"+movies[i].movieCompany+"</span></div><br />"+
+							  "<div>导演：<span id='director'>"+movies[i].director+"</span></div><br />"+
+							  "<div>饰演：<span id='actor'>"+movies[i].cosplay+"</span></div><br />"+
+							  "<div>主演：<span id='mainactor'>"+movies[i].mainActors+"</span></div><br />"+
+							  "<div>该剧简介：<span id='movieintro'>"+movies[i].introduction+"</span></div><hr />"
+					
+						$("#movieshow").append(movie);
+						
+					}
+					//好友印象
+					var friends=data.friends;
+					for(var i=0;i<friends.length;i++)
+					{
+						var friend="<span >&emsp;"+friends[i].description+"</span>";
+						$("#friend").append(friend);
+					}
+					//职业标签
+					var jobs=data.jobs;
+					for(var i=0;i<jobs.length;i++)
+					{
+						var job="<span >"+jobs[i].description+"</span>";
+						$("#job").append(job);
+					}
+					//特长
+					var specials=data.specials;
+					for(var i=0;i<specials.length;i++)
+					{
+						var special="<span >"+specials[i].description+"</span>";
+						$("#special").append(special);
+					}
+				}
+			}
+		});
+	});
+	function history(){
+		$.ajax({
+			type:"POST",
+			url:"/seallog",
+			dataType : "json",
+			data:{
+				"id":id,
+				"page":page
+			},
+			headers	:{'Content-Type': 'application/json'},
+			success:function(data){
+				if(data.msg =="success"){
+					var seals=data.data.content;
+					var totalPages=data.data.totalPages;
+					var totalElements=data.data.totalElements;
+					//var pageNum=data.data.pageable.pageNumber+1;
+					var head="<tr>"+
+						"<td></td>"+
+						"<td>操作日期</td>"+
+						"<td>操作人</td>"+
+						"<td>冻结周期</td>"+
+						"<td>备注</td>"+
+						"</tr>"
+					$("#history").empty();
+					$("#history").append(head);
+					for(var i=0;i<seals.length;i++)
+					{
+						var seal = seals[i];
+					//alert("数据=============="+aa);
+						var sealinfo="<tr><td><input type='hidden' name='IDCheck' value='"+seal.id+"' /></td>"+
+		          					"<td>"+new Date(seal.operaTime).format("yyyy/MM/dd")+"</td>"+
+		          					"<td>"+seal.operaName+"</td>"+
+		          					"<td>"+seal.freezingPeriod+"</td>"+
+		          					"<td>"+seal.remark+"</td>"+
+		        					"</tr>";
+		        					
+						$("#history").append(sealinfo);
+						$('#totalPages').html(totalPages);
+						$("#totalElements").html(totalElements);
+						$("#curPage").html(page);
+					}
+				}
+			}
+		});
+	}
+	/**日期格式转化
+	**/
+	Date.prototype.format = function(fmt)   
+    { //author: meizz   
+      var o = {   
+        "M+" : this.getMonth()+1,                 //月份   
+        "d+" : this.getDate(),                    //日   
+        "h+" : this.getHours(),                   //小时   
+        "m+" : this.getMinutes(),                 //分   
+        "s+" : this.getSeconds(),                 //秒   
+        "q+" : Math.floor((this.getMonth()+3)/3), //季度   
+        "S"  : this.getMilliseconds()             //毫秒   
+      };   
+      if(/(y+)/.test(fmt))   
+        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));   
+      for(var k in o)   
+        if(new RegExp("("+ k +")").test(fmt))   
+      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));   
+      return fmt;   
+    }  
+	/**
+	基础信息
+	**/
+	function showbase(){
+		document.getElementById("base").style.display="";//显示
+		document.getElementById("userInformation").style.display="none";
+		document.getElementById("report").style.display="none";
+		document.getElementById("freez").style.display="none";
+		document.getElementById("baseinfo").style.color='#1A5CC6';  
+		document.getElementById("full").style.color='';  
+		document.getElementById("freezing").style.color='';  
+		document.getElementById("rehistory").style.color='';  
+	}
+	/** 普通跳转 **/
+	function jumpNormalPage(page){
+		$("#submitForm").attr("action", "house_list.html?page=" + page).submit();
+	}
+	/**
+	详细信息
+	**/
+	function showinformation(){
+		
+		document.getElementById("full").style.color='#1A5CC6';  
+		document.getElementById("baseinfo").style.color='';  
+		document.getElementById("freezing").style.color='';  
+		document.getElementById("rehistory").style.color=''; 
+		document.getElementById("base").style.display="none";
+		document.getElementById("userInformation").style.display="";
+		document.getElementById("report").style.display="none";
+		document.getElementById("freez").style.display="none";
+		
+	}
+	/**
+	举报历史
+	**/
+	function showreport(){
+		
+		document.getElementById("full").style.color='';  
+		document.getElementById("baseinfo").style.color='';  
+		document.getElementById("freezing").style.color='';  
+		document.getElementById("rehistory").style.color='#1A5CC6'; 
+		document.getElementById("base").style.display="none";
+		document.getElementById("userInformation").style.display="none";
+		document.getElementById("report").style.display="";
+		document.getElementById("freez").style.display="none";
+		
+	}
+	/**
+	封号
+	**/
+	function showfreez(){
+		document.getElementById("full").style.color='';  
+		document.getElementById("baseinfo").style.color='';  
+		document.getElementById("freezing").style.color='#1A5CC6';  
+		document.getElementById("rehistory").style.color=''; 
+		document.getElementById("base").style.display="none";
+		document.getElementById("userInformation").style.display="none";
+		document.getElementById("report").style.display="none";
+		document.getElementById("freez").style.display="";
+		
+	}
+	/**
+	状态
+	**/
+	function changeStatus(status){
+		if(status==0){
+			$("#status").html("冻结");
+			document.getElementById("seal").style.display="none";
+			document.getElementById("unseal").style.display="";
+			document.getElementById("inputfreeze").style.display="";
+			document.getElementById("showfreeze").style.display="none";
+			$("#sta").val('0');
+		}else if(status==1){
+			$("#status").html("正常")
+			document.getElementById("seal").style.display="";
+			document.getElementById("unseal").style.display="none";
+			document.getElementById("inputfreeze").style.display="none";
+			document.getElementById("showfreeze").style.display="none";
+			$("#sta").val('1');
+			
+		}
+	}
+	/**
+	保存封号信息
+	**/
+	function saves(){
+		var sta=$("#sta").val();
+		var sealid=$("#sealid").val();
+		var freeze;
+		if(sta == '0'){
+			freeze=document.getElementById("freezetime").value;
+		}else{
+			freeze=document.getElementById("freezetimes").value;
+			
+		}
+		var remark=$("#marker").val();
+		//$("#form").attr("action", "/insertSeal").submit();
+		 var savedata={
+			"id":sealid,
+			"userId":id,
+			"userStatus":sta,
+			"freezingPeriod":freeze,
+			"remark":remark
+			/* "operaName":"yy",
+			"operaTime":"2018-11-11" */
+		};
+		$.ajax({
+			type:"POST",
+			url:"/insertSeal?operaName=yy&operaTime=2018-11-11",
+			contentType: 'application/json; charset=UTF-8',
+			dataType : "json",
+			data:JSON.stringify(savedata),
+		//	headers	:{'Content-Type': 'application/json'},
+			success:function(data){
+				if(data.msg =="success"){
+					//更新操作历史
+					history();
+				}
+			}
+		}); 
+	}
+</script>
+</head>
+<body>
+	<input type="hidden" name="ID" th:value="${id}" id="ID"/>
+	<input type="hidden" name="sta" id="sta"/>
+	<div id="container">
+		<div id="nav_links">
+			<a href="javascript:void(0);" onclick="showbase()" class="ui_tab"><span id="baseinfo">基础信息</span></a>
+			&nbsp;&nbsp;<a href="javascript:void(0);" onclick="showinformation()" class="ui_tab"><span id="full">详细信息</span></a>
+			 &emsp;<a href="javascript:void(0);" onclick="showreport()" class="ui_tab"><span id="rehistory">举报历史</span></a> 
+			 &emsp;<a href="javascript:void(0);" onclick="showfreez()" class="ui_tab"><span id="freezing">封号信息</span></a>
+			<div id="page_close">
+				<a href="javascript:parent.$.fancybox.close();">
+					<img src="images/common/page_close.png" width="20" height="20" style="vertical-align: text-top;"/>
+				</a>
+			</div>
+		</div>
+		<div class="ui_content" id="base">
+			<table  class="table" cellspacing="0" cellpadding="0" width="70%" align="left" border="0">
+				<tr>
+					<td class="ui_text_rt" width="80">用户头像</td>
+					<td class="ui_text_lt">
+						<img alt="" src="" id="img">
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">用户昵称:</td>
+					<td class="ui_text_lt">
+						<span id="username"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">用户id:</td>
+					<td class="ui_text_lt">
+						<span id="id"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">认证类型:</td>
+					<td class="ui_text_lt">
+						<span id=authenticationType></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">所在地区:</td>
+					<td class="ui_text_lt">
+						<span id="area"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">联系方式:</td>
+					<td class="ui_text_lt">
+						<span id="telphone"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">所属剧组:</td>
+					<td class="ui_text_lt">
+						<span id="crew"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">年龄:</td>
+					<td class="ui_text_lt">
+						<span id="age"></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="ui_text_rt">经纪公司:</td>
+					<td class="ui_text_lt">
+						<span id="economicCompany"></span>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="ui_content" id="userInformation" style="display: none;">
+			<h2>教育背景</h2>
+			<hr />
+			<div>
+				<div style="float:left">
+					<span id="school" style="align:left;"></span>
+				</div>
+				<div style="float:right">
+					<span id="school_type" style="align:right;"></span>
+				</div><br />
+				<div style="float:left"><span id="schooltimefrom" style="align:left;"></span>-<span id="schooltimeto" style="align:left;"></span></div>
+				<div style="float:right"><span id="subject" style="align:right;"></span></div><br />
+				<div><span id="schoolintro"></span></div>
+			</div>
+			<h2>影视经历</h2>
+			<hr />
+			<div id="movieshow">
+				
+			</div>
+			<h2>自我介绍</h2>
+			<hr/>
+			<span id="selfintro"></span>
+			<h2>好友印象</h2>
+			<hr/>
+			<div id="friend">
+			</div>
+			<h2>职业标签</h2>
+			<hr/>
+			<div id="job">
+			</div>
+			<h2>特长标签</h2>
+			<hr/>
+			<div id="special">
+			</div>
+		</div>
+		<div class="ui_content" id="report" style="display: none;">
+			被举报次数：<span id="reportnum"></span> 举报属实：<span id="reporttrue"></span>
+			<table id="reports" class="table" cellspacing="0" cellpadding="0" width="100%" align="center" border="1">
+				<tr>
+					<td></td>
+					<td>被举报时间</td>
+					<td>被举报人手机号</td>
+					<td>举报类型</td>
+					<td>被举报内容</td>
+					<td>举报人ID</td>
+					<td>举报人昵称</td>
+					<td>举报描述</td>
+					<td>处理状态</td>
+					<td>处理结果</td>
+					<td>操作</td>
+				</tr>
+			</table>
+			<div id="pages" >
+			<div class="ui_flt" style="height: 30px; line-height: 30px;">
+				共有
+				<span class="ui_txt_bold04" id="totalElement"></span>
+				条记录，当前第
+				<span class="ui_txt_bold04" id="curPages">
+				</span>/<span class="ui_txt_bold04" id="totalPage">
+				</span>
+				页
+			</div>
+			<div class="ui_frt">
+					<input type="button" value="首页" class="ui_input_btn01" onclick="jumpNormalPage(1);" />
+					<input type="button" value="上一页" class="ui_input_btn01" />
+					<input type="button" value="下一页" class="ui_input_btn01"
+						onclick="jumpNormalPage(2);" />
+					<input type="button" value="尾页" class="ui_input_btn01"
+						onclick="jumpNormalPage(9);" />
+					转到第<input type="text" id="jumpNumTxt" class="ui_input_txt01" />页
+					 <input type="button" class="ui_input_btn01" value="跳转" onclick="jumpInputPage(9);" />
+			</div>
+		</div>
+		</div>
+	
+		<div class="ui_content" id="freez" style="display: none;">
+			<table class="table" cellspacing="0" cellpadding="0" width="100%" align="left" border="0">
+				<tr>
+					<td> <input type="hidden" id="sealid"/></td>
+					<td>当前状态：<span id="status"></span>&emsp;
+						<input id="seal" type="button" value="永久封号" onclick="changeStatus(0)"></input>
+						&emsp;<input id="unseal" type="button" value="解除封号" onclick="changeStatus(1)"></input>
+					</td>
+					<td><span id="showfreeze" style="display:none" >冻结周期：<span id="freezetimes"></span>天</span>
+						<span id="inputfreeze" style="display:none">冻结周期：<input id="freezetime" />天</span>
+					</td>
+				<tr style="align:left">
+					<td colspan="2" >备注：<input id="marker"></input></td>
+				</tr>
+				<tr>
+					<td colspan="2"><input id="save" type="button" value="保存" onclick="saves()"/></td>
+				</tr>
+			</table>
+			<form id="historys" action="" method="post">
+			操作历史：
+				<table id="history" class="table" cellspacing="0" cellpadding="0" width="100%" align="left" border="1">
+					<tr>
+						<td></td>
+						<td>操作日期</td>
+						<td>操作人</td>
+						<td>冻结周期</td>
+						<td>备注</td>
+					</tr>
+				</table>
+			</form>
+			<div id="page" >
+			<div class="ui_flt" style="height: 30px; line-height: 30px;">
+				共有
+				<span class="ui_txt_bold04" id="totalElements"></span>
+				条记录，当前第
+				<span class="ui_txt_bold04" id="curPage">
+				</span>/<span class="ui_txt_bold04" id="totalPages">
+				</span>
+				页
+			</div>
+			<div class="ui_frt">
+					<input type="button" value="首页" class="ui_input_btn01" onclick="jumpNormalPage(1);" />
+					<input type="button" value="上一页" class="ui_input_btn01" />
+					<input type="button" value="下一页" class="ui_input_btn01"
+						onclick="jumpNormalPage(2);" />
+					<input type="button" value="尾页" class="ui_input_btn01"
+						onclick="jumpNormalPage(9);" />
+					转到第<input type="text" id="jumpNumTxt" class="ui_input_txt01" />页
+					 <input type="button" class="ui_input_btn01" value="跳转" onclick="jumpInputPage(9);" />
+			</div>
+		</div>
+		</div>
+	</div>
+</body>
+</html>

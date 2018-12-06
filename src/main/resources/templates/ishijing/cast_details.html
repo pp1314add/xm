@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<title>信息管理系统</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="script/jquery/jquery-1.7.1.js"></script>
+<link href="style/authority/basic_layout.css" rel="stylesheet" type="text/css">
+<link href="style/authority/common_style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="script/authority/commonAll.js"></script>
+<script src="script/My97DatePicker/WdatePicker.js" type="text/javascript" defer="defer"></script>
+<script type="text/javascript" src="script/artDialog/artDialog.js?skin=default"></script>
+<script src="js/ajaxfileupload.js" type="text/javascript"></script>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		var editId = $("#editid").text();
+		$("#div2").hide();
+        $("#div3").hide();
+
+		/*
+		 * 提交
+		 */
+		$.ajax({
+		  url:'/findcastbyid',
+		  type:'POST',
+		  dataType:'JSON',
+		  async : false ,
+		  data:{"id":editId},
+		  success:function(result){
+		      var acastname = result.data.castname;
+              var acastlogo = result.data.castLogo;
+              var acasttype = result.data.castType;
+              var ashootingplace = result.data.shootingPlace;
+              var adirector = result.data.director;
+              var abuildtime = result.data.buildTime;
+              var astarttime = result.data.startTime;
+              var acompanyname = result.data.companyName;
+              var alicenseNum = result.data.licenseNum;
+              var acontacts = result.data.contacts;
+              var acontactstel = result.data.contactsTel;
+              var acontactsemail = result.data.contactsEmail;
+              var alicenseImg = result.data.licenseImg;
+              var acomcontacts = result.data.comcontacts;
+              var acomcontactstel = result.data.comcontactsTel;
+              var acomcontactemail = result.data.comcontactsEmail;
+			  $("#castname").text("："+acastname);
+              $("#castlogo").text("："+acastlogo);
+              $("#casttype").text("："+acasttype);
+              $("#shootingplace").text("："+ashootingplace);
+              $("#director").text("："+adirector);
+              $("#buildtime").text("："+abuildtime);
+              $("#starttime").text("："+astarttime);
+              $("#companyname").text("："+acompanyname);
+              $("#licenseNum").text("："+alicenseNum);
+              $("#contacts").text("："+acontacts);
+              $("#contactstel").text("："+acontactstel);
+              $("#contactsemail").text("："+acontactsemail);
+              $("#licenseImg").text("："+alicenseImg);
+              $("#comcontacts").text("："+acomcontacts);
+              $("#comcontactstel").text("："+acomcontactstel);
+              $("#comcontactemail").text("："+acomcontactemail);
+		  },
+		  error:function(){
+		      alert("调用后台出错!");
+		  }
+		})
+	});
+	var page = 1;
+	var key;
+	var totalElements;
+	var totalPage;
+
+	function castmember(){
+		$("#div1").hide();
+		$("#div2").show();
+        $("#div3").hide();
+        var editId = $("#editid").text();
+        $.ajax({
+            url: '/castmember',
+            type: 'POST',
+            dataType: 'JSON',
+            async: 'false',
+            data:{page:page,key:key,castId:editId},
+            success: function (data) {
+                totalElements = JSON.stringify(data.data.totalElements);
+                totalPage = JSON.stringify(data.data.totalPage);
+                $("#totalElement").html(totalElements);
+                $("#totalPage").html(page+"/"+totalPage);
+                var str = "";
+                var status = "";
+                str += "<tr>"
+                    + "<th width='30'><input type='checkbox' id='all' onclick='selectOrClearAllCheckbox(this);' />"
+                    + "</th>"
+                    + "<th>序号</th>"
+                    + "<th>成员名称</th>"
+                    + "<th>联系方式</th>"
+                    + "<th>联系人邮箱</th>"
+                    + "<th>成员职位</th>"
+                    + "<th>操作</th>"
+                    + "</tr>";
+                $.each(data.data.castMemberList, function (index, item) {
+
+                    str += "<tr id=d"+ item.id +"><td><input type='checkbox' name='IDCheck' value='14458619251417' class='acb' /></td>"
+                    str += "<td id=i"+ item.id +">" + item.id + "</td>";
+                    str += "<td id=n"+ item.id +">" + item.memberName+ "</td>";
+                    str += "<td id=t"+ item.id +">" + item.memberTel+ "</td>";
+                    str += "<td id=e"+ item.id +">" + item.memberEmail + "</td>";
+                    str += "<td id=p"+ item.id +">" + item.memberPositions + "</td>";
+                    str += "<td id =s" + item.id + "> <input type='button' class='ui_input_btn01' value='编辑' onclick=\"clickeditcastsmember('"+item.id+"')\" '></input> <input type='button' class='ui_input_btn01' value='删除' onclick=\"deletecastmember('"+item.id+"')\" ')'></input> </td>";
+                })
+                $("#check").html(str);
+            },
+            error: function (data) {
+                alert("调用后台出错");
+            }
+        })
+	}
+
+
+
+	function clickeditcastsmember(editId){
+        $("#div1").hide();
+        $("#div2").hide();
+        $("#div3add").hide();
+        $("#div3").show();
+        $("#div3edit").show();
+	   var membername2 =  $("#n"+editId).text();
+	   var memberTel = $("#t"+editId).text();
+	   var memberEmail = $("#e"+editId).text();
+	   var memberPositions = $("#p"+editId).text();
+	   $("#div3id").val(editId);
+	   $("#membername").val(membername2);
+	   $("#membertel").val(memberTel);
+       $("#memberemail").val(memberEmail);
+       $("#memberpositions").val(memberPositions);
+	}
+
+
+	function deletecastmember(delId){
+		$.ajax({
+			url:'/deletecastmember',
+			type:'POST',
+			dataType:'text',
+			contentTyoe:'application',
+			data:{"delId":delId},
+			success:function(data){
+			    if(data=="success"){
+			        alert("删除成功")
+				}
+                castmember();
+			},
+		    erroe:function(){
+				alert("删除数据有误！")
+			}
+
+		})
+	}
+
+
+	function detailscast(){
+        $("#div3").hide();
+        $("#div2").hide();
+        $("#div1").show();
+	}
+	function addcast(){
+        $("#table3 input[type='text']").val("");
+        $("#div3id").val("");
+        $("#div1").hide();
+        $("#div2").hide();
+        $("#div3add").show();
+        $("#div3edit").hide();
+        $("#div3").show();
+    }
+
+	function addcastmember(){
+	    var result;
+        var editId = $("#editid").text();
+        var memberid= $("#div3id").val();
+        var membername = $("#membername").val();
+        var membertel = $("#membertel").val();
+        var memberemail = $("#memberemail").val();
+        var memberpositions = $("#memberpositions").val();
+         result = {"castid":editId,"memberName":membername,"memberTel":membertel,"memberEmail":memberemail,"memberPositions":memberpositions};
+		if(memberid!=null){
+		 result ={"id":memberid,"castid":editId,"memberName":membername,"memberTel":membertel,"memberEmail":memberemail,"memberPositions":memberpositions};
+		}
+
+        $.ajax({
+			url:'/insertcastmember',
+			type:'POST',
+			dataType:'text',
+			contentType:'application/json',
+			data:JSON.stringify(result),
+			success:function(data){
+				if(data=="success"){
+				    $("#table3 input[type='text']").val("");
+                    $("#div3id").val("");
+				    alert("保存成功");
+				}
+                castmember();
+			},
+			error:function(){
+			    alert("保存失败")
+
+			}
+
+		})
+	}
+    /** 普通跳转 **/
+    function jumpNormalPage(){
+        if(page == totalPage){
+            alert("已经是最后一页了！");
+            return false;
+        }
+        page=page+1;
+        castmember();
+    }
+    function jumpNormalPage1(){
+        if(page == 1){
+            alert("已经是第一页了！");
+            return false;
+        }
+        page=page-1;
+        castmember();
+    }
+    function firstPage(){
+        if(page == 1){
+            alert("已经是首页！");
+            return false;
+        }
+        page=1;
+        castmember();
+    }
+    function lastPage(){
+        if(page == totalPage){
+            alert("已经是最后一页了！");
+            return false;
+        }
+        page = totalPage;
+        castmember();
+    }
+
+    /** 输入页跳转 **/
+    function jumpInputPage(){
+        // 如果“跳转页数”不为空
+        var jumpPage = $("#jumpNumTxt").val();
+        if(jumpPage != ''){
+            var pageNum = parseInt($("#jumpNumTxt").val());
+            // 如果跳转页数在不合理范围内，则置为1
+            if(pageNum<1 | pageNum>totalPage){
+                art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'请输入合适的页数，\n自动为您跳到首页', ok:true,});
+                jumpPage = 1;
+            }
+            var numpage = parseInt(jumpPage);
+            page = numpage;
+            castmember();
+        }else{
+            // “跳转页数”为空
+            art.dialog({icon:'error', title:'友情提示', drag:false, resize:false, content:'请输入合适的页数，\n自动为您跳到首页', ok:true,});
+            jumpPage = 1
+            var numpage = parseInt(jumpPage);
+            page = numpage;
+            castmember();
+        }
+    }
+    function search(){
+        key = $("#membername2").val();
+        page = 1;
+        castmember();
+    }
+    function laststep(){
+        castmember();
+	}
+</script>
+</head>
+<body>
+<!--/*@thymesVar id="editId" type=""*/-->
+<span id="editid" th:text="${editId}" style="display:none"></span>
+<div id="div1">
+<form id="submitForm" name="submitForm" action="" method="post">
+	<input type="hidden" name="fyID" value="14458625716623" id="fyID"/>
+	<div id="container">
+		<div id="nav_links">
+			<a href="javascript:void(0)" class="ui_tab">详情信息</a>&nbsp;&nbsp;<a href="javascript:void(0)" onclick='castmember()' class="ui_tab">剧组成员</a>
+			<div id="page_close">
+				<a href="javascript:parent.$.fancybox.close();">
+					<img src="images/common/page_close.png" width="20" height="20" style="vertical-align: text-top;"/>
+				</a>
+			</div>
+		</div>
+		<div class="ui_content">
+			<table  cellspacing="0" cellpadding="0" width="100%"  border="0">
+
+				<table align="left">
+				<tr name="cast">
+					<td class="ui_text_rt" >剧组名称</td>
+					<td class="ui_text_lt">
+						<span id="castname" name="cast"/>
+					</td>
+				</tr>
+
+				<tr name="cast">
+					<td class="ui_text_rt" width="90" >剧组类型</td>
+					<td class="ui_text_lt">
+						<select name="cast" id="casttype"  class="ui_select01" onchange="getFyDhListByFyXqCode();">
+							<option value="">--请选择--</option>
+							<option value="6" selected="selected">瑞景河畔</option>
+							<option value="77">蔚蓝小区</option>
+							<option value="83">和盛园小区</option>
+						</select>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt">拍摄地点</td>
+					<td class="ui_text_lt">
+						<span id="shootingplace" name="cast" />
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >导演</td>
+					<td class="ui_text_lt">
+						<span id="director" name="cast"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt"  >建组时间</td>
+					<td class="ui_text_lt">
+						<span  id="buildtime"  name="cast"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >开机时间</td>
+					<td class="ui_text_lt">
+						<span  id="starttime"  name="cast"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >联系人</td>
+					<td class="ui_text_lt">
+						<span id="contacts" name="cast"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >联系方式</td>
+					<td class="ui_text_lt">
+						<span id="contactstel" name="cast"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >联系邮箱</td>
+					<td class="ui_text_lt">
+						<span id="contactsemail" name="cast"/>
+					</td>
+				</tr>
+				<tr name="cast">
+					<td class="ui_text_rt" >剧组LOGO</td>
+
+					<td class="ui_text_lt">
+						<div class="main-btn" ><img  width=170 height=100 id="changeImg"></img></div>
+
+					</td>
+				</tr>
+				</table>
+			<table align="center">
+				<tr name = "company">
+					<td class="ui_text_rt">公司名称</td>
+					<td class="ui_text_lt">
+						<span id="companyname" name="company"/>
+					</td>
+				</tr>
+
+
+				<tr name = "company">
+					<td class="ui_text_rt">营业执照号</td>
+					<td class="ui_text_lt">
+						<span id="licenseNum" name="company"/>
+					</td>
+				</tr>
+
+				<tr name = "company">
+					<td class="ui_text_rt">联系人</td>
+					<td class="ui_text_lt">
+						<span id="comcontacts" name="company"/>
+					</td>
+				</tr>
+				<tr name = "company">
+					<td class="ui_text_rt">联系方式</td>
+					<td class="ui_text_lt">
+						<span id="comcontactstel" name="company"/>
+					</td>
+				</tr>
+				<tr name = "company">
+					<td class="ui_text_rt">联系邮箱</td>
+					<td class="ui_text_lt">
+						<span type="text" id="comcontactemail" name="company"/>
+					</td>
+				</tr>
+				<tr name = "company">
+					<td class="ui_text_rt">营业执照</td>
+					<td class="ui_text_lt">
+						<img id="licenseImg" name="company"/>
+					</td>
+				</tr>
+			</table>
+			</table>
+		</div>
+	</div>
+</form>
+	</div>
+
+
+	<div id ="div2">
+		<form id="submitForm2" name="submitForm" action="" method="post">
+			<input type="hidden" name="allIDCheck" value="" id="allIDCheck"/>
+			<input type="hidden" name="fangyuanEntity.fyXqName" value="" id="fyXqName"/>
+			<div id="container2">
+				<div id="nav_links1">
+					<a href="javascript:void(0)" class="ui_tab" onclick='detailscast()'>详情信息</a>&nbsp;>&nbsp;<a href="javascript:void(0)" onclick='castmember()' class="ui_tab">剧组成员</a>
+				</div>
+				<div class="ui_content">
+					<div class="ui_text_indent">
+						<div id="box_border">
+							<div id="box_top">搜索</div>
+							<div id="box_center">
+								成员名称&nbsp;&nbsp;<input type="text" id="membername2" name="fangyuanEntity.fyZldz" class="ui_input_txt02" />
+							</div>
+							<div id="box_bottom">
+								<input type="button" value="查询" class="ui_input_btn01" onclick="search();" />
+								<input type="button"  name="add" class="ui_input_btn01" value="添加" onclick="addcast();"/>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<div class="ui_content">
+					<div class="ui_tb">
+						<table id="check" class="table" cellspacing="0" cellpadding="0" width="100%" align="center" border="0">
+
+						</table>
+					</div>
+					<div class="ui_tb_h30">
+						<div class="ui_flt" style="height: 30px; line-height: 30px;">
+							共有
+							<span class="ui_txt_bold04" id="totalElement"></span>
+							条记录，当前第
+							<span class="ui_txt_bold04" id="totalPage"></span>
+							页
+						</div>
+						<div class="ui_frt">
+							<!--    如果是第一页，则只显示下一页、尾页 -->
+
+							<input type="button" value="首页" class="ui_input_btn01" onclick="firstPage();"/>
+							<input type="button" value="上一页" class="ui_input_btn01" onclick="jumpNormalPage1();" />
+							<input type="button" value="下一页" onclick="jumpNormalPage();" class="ui_input_btn01"/>
+							<input type="button" value="尾页" class="ui_input_btn01"
+								   onclick="lastPage();" />
+
+
+
+							<!--     如果是最后一页，则只显示首页、上一页 -->
+
+							转到第<input type="text" id="jumpNumTxt" class="ui_input_txt01" />页
+							<input type="button" class="ui_input_btn01" value="跳转" onclick="jumpInputPage();" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<div id="div3">
+		<form id="submitForm3" name="submitForm" action="" method="post">
+			<input type="hidden" name="fyID" value="14458625716623" id="fyID3"/>
+			<div id="container3">
+				<div id="nav_links3">
+					当前位置：新增数据&nbsp;>&nbsp;<span id ="div3add" style="color: #1A5CC6;" name="cast">添加剧组成员</span><span id ="div3edit" style="color: #1A5CC6;" name="cast">编辑剧组成员</span>
+				</div>
+				<div class="ui_content">
+					<table id ="table3"  cellspacing="0" cellpadding="0" width="100%" align="left" border="0">
+						<span id="div3id" style="display:none"> </span>
+
+						<tr name="cast">
+							<td class="ui_text_rt" >成员名称</td>
+							<td class="ui_text_lt">
+								<input type="text" id="membername"  name="cast"   class="ui_input_txt02"/>
+							</td>
+						</tr>
+
+
+						<tr name="cast">
+							<td class="ui_text_rt">联系方式</td>
+							<td class="ui_text_lt">
+								<input type="text" id="membertel" name="cast"   class="ui_input_txt02"/>
+							</td>
+						</tr>
+						<tr name="cast">
+							<td class="ui_text_rt" >联系人邮箱</td>
+							<td class="ui_text_lt">
+								<input type="text" id="memberemail" name="cast"  class="ui_input_txt02"/>
+							</td>
+						</tr>
+
+						<tr name="cast">
+							<td class="ui_text_rt" >成员职位</td>
+							<td class="ui_text_lt">
+								<input type="text" id="memberpositions" name="cast"  class="ui_input_txt02"/>
+							</td>
+						</tr>
+
+						<tr name = "company">
+							<td>&nbsp;</td>
+							<td class="ui_text_lt">
+								&nbsp;<input id="last" type="button" value="上一步" class="ui_input_btn01" onclick="laststep()"/>
+								&nbsp;<input id="submit" type="button" value="提交" class="ui_input_btn01" onclick="addcastmember()"/>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</form>
+
+
+	</div>
+</body>
+</html>
